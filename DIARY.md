@@ -4,6 +4,18 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 08:35 — Scaffolded Playwright by hand instead of `npm init playwright@latest`
+
+**Decision:** Set up the Playwright + TypeScript project manually — `npm install -D @playwright/test`, `npx playwright install chromium --with-deps`, then hand-wrote `playwright.config.ts` and a `tests/` layout with `pages/` and `fixtures/` folders for the upcoming Page Object Model — rather than running the official `npm init playwright@latest` scaffolding script.
+
+**Why:** The init script is interactive and opinionated: it prompts for JS/TS, test folder naming, a GitHub Actions workflow, and generates its own `tsconfig.json`/`.gitignore`/example tests. This repo already had a `tsconfig.json`, ESLint, Prettier, and `.gitignore` from the earlier foundations work, and letting the wizard run would have meant it either overwrote that config or had to be reconciled with it afterwards. Doing it by hand kept full control over what got created and avoided fighting the wizard's defaults. One smoke spec (`tests/example.spec.ts`) was written to prove the config works end-to-end, instead of keeping the wizard's generated example tests.
+
+**Alternatives considered:** Running the wizard and then diffing/cleaning up whatever it overwrote — rejected as more work and more risk than just writing the handful of config files directly.
+
+**Next:** Build out the Page Object Model and the 4 planned specs (login, add-to-cart, checkout, cart management).
+
+---
+
 ## 2026-09-19 08:33 — Foundations: ESLint enforcement + .nvmrc for reviewer friction
 
 **Decision:** Before writing any test logic, laid the foundations for the codebase: ESLint (with typescript-eslint + Prettier) so the project has an enforced set of rules keeping it tidy, and `.nvmrc` pinning the exact Node version.
