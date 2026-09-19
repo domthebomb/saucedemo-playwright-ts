@@ -4,6 +4,22 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 08:43 — Designed, but deliberately did not build, a POM-generator skill
+
+**Decision:** Designed a two-stage tool for automatically generating Page Object Model classes from the live site, but chose not to implement it for this take-home.
+
+The design: a plain deterministic script (no LLM involved) logs in, crawls same-origin links, and supplements that crawl with a seed list of URLs for flow-gated pages the crawler can't reach on its own (cart, checkout steps — pages that only exist after specific actions). For each page it visits, it dumps the accessibility tree to a slugged YAML file. Same input always produces the same output — no model judgment in this stage. A second, separate skill would then consume those YAML dumps and turn them into idiomatic POM classes: sensible naming, a component-object pattern for structures that repeat across pages (e.g. a cart-item row), and matching a new dump against existing POM files by page identity (URL/route) rather than by slug text, so re-running the crawl after a UI change updates the right class instead of creating a duplicate.
+
+The validation I'd have written for the deterministic half: Vitest unit tests on the script's pure-logic helpers (slug encoding, link-exclusion rules, base-URL and relative-path resolution) at 100% coverage, plus a Stryker mutation testing run against that same file with a 100% kill threshold. The reasoning for going beyond line coverage: a silent bug in the scraper (e.g. a link-exclusion rule that's too broad, or a path-resolution edge case) doesn't fail loudly — it turns into a wrong or missing locator several steps downstream, in code a human may not think to double-check because "the generator wrote it." Coverage alone proves the lines ran, not that the tests would actually catch a mutated version of that logic; mutation testing is the check that closes that gap.
+
+**Why:** The brief itself says this is "less about coverage, more about" structure, maintainability, and thought process, under a hard 2-3 hour time-box — and the ticket already scoped this session to 4 hand-written specs plus a POM, not tooling to generate POMs. Building the generator now would have eaten the entire time budget on infrastructure for a problem (4 pages, ~4 page objects) that doesn't yet justify automating. Recognizing that and stopping at the design is the same scope-control judgment call as the earlier decision not to run `npm init playwright@latest` — knowing when *not* to build something is being treated as a deliverable in its own right here, not as a corner cut.
+
+**Alternatives considered:** Building a minimal version of just the crawler/dumper half without the generator skill — rejected because a crawler with no consumer produces YAML files nobody reads, which is effort spent with no payoff within this time-box.
+
+**Next:** This stays out of scope for the submission itself, but goes in the README's ToDo section as future work, with this diary entry as the design record.
+
+---
+
 ## 2026-09-19 08:35 — Scaffolded Playwright by hand instead of `npm init playwright@latest`
 
 **Decision:** Set up the Playwright + TypeScript project manually — `npm install -D @playwright/test`, `npx playwright install chromium --with-deps`, then hand-wrote `playwright.config.ts` and a `tests/` layout with `pages/` and `fixtures/` folders for the upcoming Page Object Model — rather than running the official `npm init playwright@latest` scaffolding script.
