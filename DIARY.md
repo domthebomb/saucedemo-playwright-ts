@@ -4,6 +4,16 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 11:15 — Turned on branch protection: CI is now an actual gate
+
+**Decision:** The same review that flagged the dead-code overstatement (see the entry above) also caught that the 11:02 entry's claim — that CI turns "the tests pass" into "an actual quality gate/definition of done, not a courtesy" — wasn't true yet: `master` had no branch protection, so a red check wouldn't have blocked either of the two merges that already happened. Turned it on via `gh api .../branches/master/protection`, requiring the `test` status check (the CI job) to pass, in strict mode (branch must be up to date with `master` before merging). Verified it's actually active by reading the setting back, not just trusting the PUT returned 200.
+
+**Why:** Same principle as the dead-code correction: a claim in this diary turned out to be ahead of the repo's actual state, and the fix is to make the repo state match the claim rather than soften the claim. This one's a repo setting, not a commit, so — unlike the dead-code fix — it doesn't go through the new CLAUDE.md branch+PR rule; there's no code change to review.
+
+**Next:** Submission is complete. Both open PRs (`CLAUDE.md`, the dead-code cleanup) are left for review/merge, per CLAUDE.md's own rule not to self-merge.
+
+---
+
 ## 2026-09-19 11:14 — Correcting an earlier entry's claim: the dead-code trim wasn't complete
 
 **Decision:** A third independent Opus review (fresh agent, no session context, same pattern as the first two) checked the finished, merged submission and found that the 10:26 entry below overstated itself: it says the review's flagged dead POM surface was "trimmed," but a `grep` showed six members still had zero call sites — `ProductList.prices()`, `BurgerMenu.resetAppState()`/`goToAllItems()`/`aboutLink`/`resetAppStateLink`/`allItemsLink`, `BurgerMenu.close()` (only reachable from the two dead methods above it), and `InventoryPage.goto()`. Verified each one myself via grep across `tests/` before removing any of them — confirmed genuinely zero call sites, not just in specs but anywhere in the POM/fixtures either. Removed all six (well, seven, one review comment double-counted `close()`'s dependents). `BurgerMenu` now only exposes what `logout()` actually needs.
