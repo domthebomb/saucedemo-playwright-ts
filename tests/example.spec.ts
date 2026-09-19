@@ -8,7 +8,7 @@ test("scaffold smoke test: POM wiring works end-to-end", async ({ loginPage, inv
   await expect(inventoryPage.inventoryList).toBeVisible();
   await expect(inventoryPage.items).toHaveCount(6);
 
-  await inventoryPage.burgerMenu.open();
-  await expect(inventoryPage.burgerMenu.logoutLink).toBeVisible();
-  await inventoryPage.burgerMenu.close();
+  await inventoryPage.header.burgerMenu.open();
+  await expect(inventoryPage.header.burgerMenu.logoutLink).toBeVisible();
+  await inventoryPage.header.burgerMenu.close();
 });
