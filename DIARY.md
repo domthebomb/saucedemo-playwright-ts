@@ -4,6 +4,16 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 11:02 — Shipped CI with the spare time, because this is the QA Lead role
+
+**Decision:** With roughly 10 minutes left in the time-box, used it to add a GitHub Actions workflow (`.github/workflows/tests.yml`) that runs typecheck, lint, a Prettier check, and the full Playwright suite on every push to `master` and every PR. Verified it end-to-end on a real PR (#2) rather than just merging it and hoping — confirmed the check actually ran on GitHub's own infrastructure, passed, and attached correctly to the PR, before merging.
+
+**Why:** This role is specifically a QA Lead hired to help drive automation, not a generic QA IC — so the bar isn't "did the tests pass on my machine," it's "would I require this of every test addition to a company repo." I would: CI is what turns "the tests pass" from a claim into a property of the codebase — an actual quality gate/definition of done, not a courtesy. A test suite nobody runs automatically is a test suite that silently rots the first time someone doesn't run it locally before merging. Prioritizing this with the last few minutes, over anything else still on the ToDo list, was a direct call about what a lead in this role should treat as non-negotiable versus nice-to-have.
+
+**Next:** Submission is complete as of this entry.
+
+---
+
 ## 2026-09-19 10:39 — Collapsed the stack back into one PR, with the commits kept intact
 
 **Decision:** Reversing the 10:29 decision to use stacked PRs. Requested an independent Opus assessment (fresh agent, no session context) of whether the full scope of what had accumulated — POM work, an independent code review, a growing diary, and now a 3-layer stacked-PR chain — was appropriately scaled for a 2-3 hour take-home that explicitly de-prioritizes process over "clean/maintainable code, logical structuring, thought process." Its verdict on the stack specifically: wrong tool for this shape of change. A stack's purpose is landing an independent unit while later layers are still in review; what we had was a mid-session bug fix discovered 90 minutes into unmerged work in the same sitting — not a separable landing unit. The diff sizes made the same point on their own (roughly 90/65/220 lines across the three layers) — small enough that three ordered commits in one PR communicate the same "these are different concerns" signal without the review overhead of three linked PRs for a single reviewer who reads the whole thing at once regardless.
