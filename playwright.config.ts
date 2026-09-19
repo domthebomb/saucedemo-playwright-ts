@@ -10,6 +10,8 @@ export default defineConfig({
     baseURL: "https://www.saucedemo.com",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
+    // Sauce Demo marks interactive elements with data-test, not the Playwright default data-testid.
+    testIdAttribute: "data-test",
   },
   projects: [
     {

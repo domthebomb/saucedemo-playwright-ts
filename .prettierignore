@@ -3,3 +3,6 @@ dist
 playwright-report
 test-results
 package-lock.json
+
+# Prose files keep their own voice; Prettier is for code, not narrative markdown.
+*.md
