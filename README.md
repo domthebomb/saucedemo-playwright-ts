@@ -59,7 +59,7 @@ tests/
 
 Given more time, in roughly this order:
 
-- **CI**: a GitHub Actions workflow running the suite on every PR — deliberately out of scope for this time-box.
+- ~~**CI**: a GitHub Actions workflow running the suite on every PR~~ — added as a follow-up (`.github/workflows/tests.yml`): typecheck, lint, format check, then the suite, on every push to `master` and every PR, with the HTML report uploaded as an artifact.
 - **Cross-browser matrix**: currently Chromium only; Firefox/WebKit projects are a one-line addition to `playwright.config.ts`.
 - **Visual regression**: `toHaveScreenshot()` baselines, specifically for the `problem_user`/`visual_user` accounts Sauce Demo ships for exactly this purpose (intentionally broken images/layout). Considered and deliberately deferred — baseline images are an ongoing maintenance cost (OS/font-rendering drift), not a one-time setup, so they don't fit a 2-3 hour window.
 - **Accessibility testing**: `@axe-core/playwright` against the key pages.
