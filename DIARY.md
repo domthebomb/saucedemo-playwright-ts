@@ -4,6 +4,18 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 09:09 — POM design is the "clean, maintainable, reusable" requirement, made concrete
+
+**Decision:** Calling out explicitly that the POM work isn't just structure for its own sake — it's a direct answer to the assignment's "Clean, maintainable, and reusable code" expectation. The BasePage/AuthenticatedPage hierarchy exists to promote reuse and keep locators/logic out of individual tests: if something on the site changes, the fix happens once in the relevant page object, and every spec that uses it benefits automatically instead of the same fix needing to be repeated across tests. While reviewing the site I also noticed a component shared across every authenticated page (the header: burger menu + cart), so that got extracted into its own `Header` component (wrapping the burger menu and the cart link/badge together) rather than duplicated per page or modelled inconsistently with the rest of the header.
+
+This also connects back to the POM-generator/"healer" skill designed (but deliberately not built) earlier — see the "Designed, but deliberately did not build, a POM-generator skill" entry further down. That skill is where ongoing maintenance of this POM would eventually live: it could run as a GitHub Actions workflow step in CI, triggered on a schedule or on site changes, invoking Claude plus the deterministic crawler to detect drift between the live site and the existing POM and self-heal the affected locators/tests, rather than a human having to notice a broken selector and chase it down by hand.
+
+**Why:** The brief weights "expectations" (structure, maintainability, thought process) over raw test coverage, so it's worth being explicit that the architecture choices here are the deliverable, not just scaffolding around it. The CI-healer framing also gives a concrete "next step" for the ToDo section that ties the two design decisions (POM structure now, POM-generator skill later) into one coherent story rather than two disconnected ideas.
+
+**Next:** Carry the CI self-healing idea into the README's ToDo section alongside the POM-generator design.
+
+---
+
 ## 2026-09-19 08:43 — Designed, but deliberately did not build, a POM-generator skill
 
 **Decision:** Designed a two-stage tool for automatically generating Page Object Model classes from the live site, but chose not to implement it for this take-home.
