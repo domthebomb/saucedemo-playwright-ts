@@ -4,6 +4,18 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 10:39 — Collapsed the stack back into one PR, with the commits kept intact
+
+**Decision:** Reversing the 10:29 decision to use stacked PRs. Requested an independent Opus assessment (fresh agent, no session context) of whether the full scope of what had accumulated — POM work, an independent code review, a growing diary, and now a 3-layer stacked-PR chain — was appropriately scaled for a 2-3 hour take-home that explicitly de-prioritizes process over "clean/maintainable code, logical structuring, thought process." Its verdict on the stack specifically: wrong tool for this shape of change. A stack's purpose is landing an independent unit while later layers are still in review; what we had was a mid-session bug fix discovered 90 minutes into unmerged work in the same sitting — not a separable landing unit. The diff sizes made the same point on their own (roughly 90/65/220 lines across the three layers) — small enough that three ordered commits in one PR communicate the same "these are different concerns" signal without the review overhead of three linked PRs for a single reviewer who reads the whole thing at once regardless.
+
+Collapsed by removing local `gh-stack` tracking (`gh stack unstack --local` — nothing had been pushed or linked on GitHub yet, so this was purely local cleanup) and deleting the two intermediate branches; `feature/critical-path-tests` already contained every commit from both lower layers in linear order, so no history rewrite was needed — "collapsing" was just the decision to open one PR from this branch instead of three.
+
+**Why:** The same review also flagged a sharper risk than "looks like overkill": the 09:42 entry already said a single PR was right-sized, so the 10:29 reversal was on the record without ever addressing why ordered commits didn't solve the same problem for free — exactly the gap an interviewer would push on. Collapsing now, with this entry explaining both the reversal and the reversal-of-the-reversal, converts the whole episode into a demonstrated right-sizing judgment call rather than a live liability. The same independent-review instinct that caught the locator-scoping bug earlier applies here too: check your own process decisions against outside judgment before shipping them, not just your code.
+
+**Next:** Push `feature/critical-path-tests` and open the single PR against `master`.
+
+---
+
 ## 2026-09-19 10:29 — Reversing the single-PR decision: stacked PRs instead
 
 **Decision:** The 09:42 entry below explicitly decided one PR was the right size for the critical-path tests and that stacking would be "process for its own sake" here. Reversing that now: split the accumulated work into a 3-layer stack instead — `fix/product-list-locator-scoping` → `chore/eslint-playwright-hardening` → `feature/critical-path-tests` — using GitHub's native stacked-PR feature (public preview since 2026-07-30) via the `gh-stack` CLI extension, rather than one PR.
