@@ -1,10 +1,11 @@
-import { test as base } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
 import { LoginPage } from "../pages/LoginPage";
 import { InventoryPage } from "../pages/InventoryPage";
 import { CartPage } from "../pages/CartPage";
 import { CheckoutStepOnePage } from "../pages/CheckoutStepOnePage";
 import { CheckoutStepTwoPage } from "../pages/CheckoutStepTwoPage";
 import { CheckoutCompletePage } from "../pages/CheckoutCompletePage";
+import { users } from "./users";
 
 type PageFixtures = {
   loginPage: LoginPage;
@@ -13,6 +14,8 @@ type PageFixtures = {
   checkoutStepOnePage: CheckoutStepOnePage;
   checkoutStepTwoPage: CheckoutStepTwoPage;
   checkoutCompletePage: CheckoutCompletePage;
+  /** Inventory page for a session that's already logged in as the standard user. */
+  loggedInInventoryPage: InventoryPage;
 };
 
 /**
@@ -38,6 +41,15 @@ export const test = base.extend<PageFixtures>({
   },
   checkoutCompletePage: async ({ page }, use) => {
     await use(new CheckoutCompletePage(page));
+  },
+  loggedInInventoryPage: async ({ loginPage, inventoryPage }, use) => {
+    await loginPage.goto();
+    await loginPage.login(users.standard.username, users.standard.password);
+    await expect(
+      inventoryPage.inventoryList,
+      "Setup login failed — standard_user did not reach the inventory page. This is the loggedInInventoryPage fixture, not the test itself, so check login/site availability first.",
+    ).toBeVisible();
+    await use(inventoryPage);
   },
 });
 
