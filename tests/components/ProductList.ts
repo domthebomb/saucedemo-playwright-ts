@@ -33,8 +33,4 @@ export class ProductList {
   names(): Locator {
     return this.items.getByTestId("inventory-item-name");
   }
-
-  prices(): Locator {
-    return this.items.getByTestId("inventory-item-price");
-  }
 }

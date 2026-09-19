@@ -4,6 +4,16 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 11:14 — Correcting an earlier entry's claim: the dead-code trim wasn't complete
+
+**Decision:** A third independent Opus review (fresh agent, no session context, same pattern as the first two) checked the finished, merged submission and found that the 10:26 entry below overstated itself: it says the review's flagged dead POM surface was "trimmed," but a `grep` showed six members still had zero call sites — `ProductList.prices()`, `BurgerMenu.resetAppState()`/`goToAllItems()`/`aboutLink`/`resetAppStateLink`/`allItemsLink`, `BurgerMenu.close()` (only reachable from the two dead methods above it), and `InventoryPage.goto()`. Verified each one myself via grep across `tests/` before removing any of them — confirmed genuinely zero call sites, not just in specs but anywhere in the POM/fixtures either. Removed all six (well, seven, one review comment double-counted `close()`'s dependents). `BurgerMenu` now only exposes what `logout()` actually needs.
+
+**Why:** Per the diary skill's own rule, past entries aren't edited except a typo in the most recent one — this is neither, so the 10:26 entry stands as written, inaccurate claim included, and this entry is the correction instead. That's the more honest failure mode for an append-only log: leaving a wrong claim visible next to its correction is better than quietly rewriting history to look like it was never wrong. The inaccuracy itself was small (dead code, not a behavioural bug), but a diary whose entire value proposition is "this is what actually happened, not marketing copy" has a specific obligation to correct itself in public when a claim in it turns out to be only partly true.
+
+**Next:** Submission is complete.
+
+---
+
 ## 2026-09-19 11:02 — Shipped CI with the spare time, because this is the QA Lead role
 
 **Decision:** With roughly 10 minutes left in the time-box, used it to add a GitHub Actions workflow (`.github/workflows/tests.yml`) that runs typecheck, lint, a Prettier check, and the full Playwright suite on every push to `master` and every PR. Verified it end-to-end on a real PR (#2) rather than just merging it and hoping — confirmed the check actually ran on GitHub's own infrastructure, passed, and attached correctly to the PR, before merging.
