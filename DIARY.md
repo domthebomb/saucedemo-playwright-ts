@@ -4,6 +4,41 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 09:31 — Credential management: fine as hardcoded here, would use 1Password CLI in an enterprise framework
+
+**Decision:** A separate note from the test-strategy entry above, since it's a distinct decision rather than part of choosing which 4 tests to write.
+
+For this take-home, the Sauce Demo test credentials (`standard_user` / `secret_sauce`, etc.) are published in plain text on the login page itself — they aren't secrets. Hardcoding them directly in `tests/fixtures/users.ts` is correct as-is; introducing `.env` files or a secrets manager to protect already-public demo credentials would be overengineering for this specific repo.
+
+Worth recording anyway how this would differ in a real enterprise framework, since real environments carry actual sensitive credentials: the pattern to avoid is every developer hand-maintaining their own `.env` file, which rots in predictable ways — someone's goes stale, someone commits one by accident, someone leaves the team and their copy is still floating around on a laptop.
+
+The fix would be 1Password CLI (`op`). The repo would hold only a `.env` template of `op://vault/item/field` references, never real values, so there's nothing sensitive to accidentally commit. Locally, developers run tests via `op run -- npm test`, which resolves those references to real secret values as environment variables for that process only — nobody creates or maintains their own `.env`. In CI, a scoped 1Password Service Account would replace long-lived repo/org secrets, centrally rotatable and revocable in one place instead of duplicated across every pipeline that needs them. Net effect: no secrets at rest in the repo or scattered across CI secret stores, one source of truth.
+
+**Why:** Matching the security response to the actual risk — these credentials carry zero risk since Sauce Demo publishes them itself, so protecting them would be theater, not security. The value here is demonstrating the enterprise-grade pattern is understood, not applying it where it isn't needed.
+
+**Next:** Goes in the README's ToDo section as a production-readiness consideration, not as something to implement here.
+
+---
+
+## 2026-09-19 09:31 — Risk-based test selection for a B2C app, reviewed against the live site
+
+**Decision:** ~1 hour into the time-box, now thinking carefully about which tests actually matter — deliberately delayed until after scaffolding, since strategy needs something to build on rather than being an oversight. Framed the AUT as what it actually is — a B2C e-commerce site — because that's what should drive "critical" vs merely useful, not exhaustive feature coverage. Before finalizing, reviewed the live site rather than relying on assumptions, which sharpened the plan in a few places. Landed on:
+
+- **Login, success path**: if this doesn't work, nothing else in the app matters, so it's the first gate.
+- **Login, failure path — as two distinct cases, not one**: the site returns different error messages for different failure reasons (`"Username and password do not match any user in this service"` for bad credentials vs `"Sorry, this user has been locked out."` for `locked_out_user`), meaning these exercise different logic — credential matching vs. an account-status check. Testing only one would let a regression in the other slip through. This matters because it's a public B2C app: an auth defect is a reputational and security risk, not just a UX bug, and since revenue is the core driver here, both directions are critical.
+- **One end-to-end purchase journey** (login → add two items to cart → checkout), using Playwright's `test.step()` to break it into named steps for failure localization in the report/trace viewer — getting the BDD benefit of "which step broke" natively, without adopting BDD tooling for a take-home. The highest-value assertion in this test isn't "did checkout complete" but the price math: confirmed a single $29.99 item produces tax $2.40 (an 8% rate) and total $32.39, so the test will assert the exact computed total for the two-item cart rather than just the confirmation banner. A silently wrong subtotal/tax/total is a direct revenue-integrity bug on a commerce site.
+- **Cart management** (remove an item, confirm price/count updates correctly) as the fourth test — the same "money must be correct" risk as the checkout math, just on the subtraction side. This gives the suite a consistent theme: login gates access, and two tests independently verify the app never gets a customer's cart total wrong.
+
+Also noted the site actually has 6 test users (`standard_user`, `locked_out_user`, `problem_user`, `performance_glitch_user`, `error_user`, `visual_user`) — the last three are classic intentionally-broken accounts (broken images/sort, broken cart behavior, visual glitches), good bug-hunting/visual-regression material but not core-critical by this bar, same treatment as the decision not to test sorting. Both go in the README ToDo as future work.
+
+**Why:** Considered decomposing the E2E journey into separate BDD-style scenarios (login / add-to-cart / checkout as discrete steps) — real merit, since a narrow failing scenario localizes a defect faster than a failure buried inside one long E2E test. Rejected the BDD framework for this take-home in favor of `test.step()`, which gets the same localization benefit for free.
+
+Also considered snapshot/visual regression testing (Playwright's `toHaveScreenshot()`) as an assertion strategy — confirmed this was already ruled out of scope in the original ticket alongside CI/cross-browser/a11y, and revisiting it holds up: baseline images are brittle across OS/font-rendering and CI vs. local, so they're an ongoing maintenance cost, not a one-time setup, and don't fit a 2-3 hour window. It's the natural tool for the `problem_user`/`visual_user` follow-up already in the ToDo, since those accounts exist specifically to introduce visual bugs — so it's parked in the same bucket rather than treated as a separate new idea.
+
+**Next:** Implement the 4 specs: login (success + two failure modes), the 2-item E2E purchase journey with exact price assertions, and cart management.
+
+---
+
 ## 2026-09-19 09:09 — POM design is the "clean, maintainable, reusable" requirement, made concrete
 
 **Decision:** Calling out explicitly that the POM work isn't just structure for its own sake — it's a direct answer to the assignment's "Clean, maintainable, and reusable code" expectation. The BasePage/AuthenticatedPage hierarchy exists to promote reuse and keep locators/logic out of individual tests: if something on the site changes, the fix happens once in the relevant page object, and every spec that uses it benefits automatically instead of the same fix needing to be repeated across tests. While reviewing the site I also noticed a component shared across every authenticated page (the header: burger menu + cart), so that got extracted into its own `Header` component (wrapping the burger menu and the cart link/badge together) rather than duplicated per page or modelled inconsistently with the rest of the header.
