@@ -4,6 +4,16 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 10:28 — Hardened lint/config as its own change, separate from the bugfix
+
+**Decision:** Split the tooling hardening (ESLint's `recommendedTypeChecked` + `eslint-plugin-playwright`, `playwright.config.ts` trace/reporter tweaks) into its own change on top of the locator-scoping fix, rather than bundling it into that same commit/PR.
+
+**Why:** The two are related but not the same decision: the bugfix addresses one specific bug; the lint upgrade addresses the *class* of bug — specifically enabling `@typescript-eslint/no-floating-promises`, which is the rule that would have flagged a missing `await` on an `expect()` call, the exact failure mode that let the locator bug's specs pass for the wrong reason. Reviewing them separately means a reviewer can evaluate "is this fix correct" independently from "is this tooling change reasonable," instead of one diff doing both jobs.
+
+**Next:** Layer the actual new test specs on top of this — the deliverable, now sitting on a verified-correct, better-linted foundation.
+
+---
+
 ## 2026-09-19 10:26 — Independent Opus review found a real locator-scoping bug
 
 **Decision:** Requested a fresh Opus-model agent, deliberately with no context from this session, to review the POM and specs cold against the assignment brief before committing them. It found a genuine correctness bug, not just style feedback: `data-test="inventory-item"` is reused by Sauce Demo across the inventory grid, the cart rows, and the checkout order summary, and every page object queried it from the bare page rather than a scoped container — so `CartPage.items` and `InventoryPage.items` were, structurally, the same locator. Verified this myself rather than taking the report on faith: 8/8 runs of "click cart link → wait for cart URL → query the locator `CartPage.items` used" returned the 6 inventory cards, not the 2 cart rows, because the site is a client-routed SPA where the URL updates before React re-renders. Existing specs passed anyway only because retrying `expect()` calls waited out the race; `cart-management.spec.ts`'s item-removal calls had no such gate and could silently act on the wrong page.
