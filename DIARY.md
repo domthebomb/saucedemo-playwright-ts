@@ -4,6 +4,18 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 10:29 — Reversing the single-PR decision: stacked PRs instead
+
+**Decision:** The 09:42 entry below explicitly decided one PR was the right size for the critical-path tests and that stacking would be "process for its own sake" here. Reversing that now: split the accumulated work into a 3-layer stack instead — `fix/product-list-locator-scoping` → `chore/eslint-playwright-hardening` → `feature/critical-path-tests` — using GitHub's native stacked-PR feature (public preview since 2026-07-30) via the `gh-stack` CLI extension, rather than one PR.
+
+**Why:** The original call wasn't wrong given what was known at the time — it assumed the branch would contain roughly what the ticket described. What actually happened is that *writing* the tests surfaced a real locator-scoping bug (via an independent Opus review) and a genuine lint gap, neither of which existed as known scope when that decision was made. That's a sharper version of an old problem: AI-assisted sessions can generate a lot of surface area very quickly, so a scope decision made once up front doesn't hold — it has to be revisited as new information actually appears, or a single PR quietly balloons into three unrelated concerns (a bugfix, a tooling change, and the actual deliverable) bundled as one diff, which is exactly the kind of PR that's hard to review well regardless of its line count. Splitting them means a reviewer can evaluate "is the bug fix correct," "is the tooling change reasonable," and "are these the right tests" as three separate, smaller questions instead of one entangled one.
+
+The GitHub Copilot review plan from the 09:42 entry still stands — requesting it on the stack's PRs once opened, for the same reason as before: an independent model reviewing code this session wrote is worth more than this session reviewing itself.
+
+**Next:** Run `gh stack submit` to push all three branches and open the linked PRs, then request Copilot review.
+
+---
+
 ## 2026-09-19 10:28 — Hardened lint/config as its own change, separate from the bugfix
 
 **Decision:** Split the tooling hardening (ESLint's `recommendedTypeChecked` + `eslint-plugin-playwright`, `playwright.config.ts` trace/reporter tweaks) into its own change on top of the locator-scoping fix, rather than bundling it into that same commit/PR.
