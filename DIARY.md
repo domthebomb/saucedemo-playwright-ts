@@ -4,6 +4,18 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 10:26 — Independent Opus review found a real locator-scoping bug
+
+**Decision:** Requested a fresh Opus-model agent, deliberately with no context from this session, to review the POM and specs cold against the assignment brief before committing them. It found a genuine correctness bug, not just style feedback: `data-test="inventory-item"` is reused by Sauce Demo across the inventory grid, the cart rows, and the checkout order summary, and every page object queried it from the bare page rather than a scoped container — so `CartPage.items` and `InventoryPage.items` were, structurally, the same locator. Verified this myself rather than taking the report on faith: 8/8 runs of "click cart link → wait for cart URL → query the locator `CartPage.items` used" returned the 6 inventory cards, not the 2 cart rows, because the site is a client-routed SPA where the URL updates before React re-renders. Existing specs passed anyway only because retrying `expect()` calls waited out the race; `cart-management.spec.ts`'s item-removal calls had no such gate and could silently act on the wrong page.
+
+Fixed by extracting a `ProductList` component rooted at each page's own container, which also collapsed three copies of near-identical item-lookup logic into one — the review separately flagged that duplication as undercutting the "promote reuse" rationale already documented for the Header/BurgerMenu split. Also trimmed a real pile of dead POM surface the review found: several page-object methods and two fixture users with zero call sites anywhere in the specs.
+
+**Why:** The review was deliberately a fresh agent with no session context, not a fork of this conversation — the reasoning is the same as requesting a GitHub Copilot review: the same model reviewing its own output shares its own blind spots, so an independent pass is only worth something if it's actually independent.
+
+**Next:** Harden lint/type-check config so this class of bug is caught automatically next time, as its own change — logged separately below.
+
+---
+
 ## 2026-09-19 09:31 — Credential management: fine as hardcoded here, would use 1Password CLI in an enterprise framework
 
 **Decision:** A separate note from the test-strategy entry above, since it's a distinct decision rather than part of choosing which 4 tests to write.
