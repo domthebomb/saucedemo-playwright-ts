@@ -36,7 +36,7 @@ npm run format        # prettier --write .
 
 ## What's covered
 
-Four critical-path areas, chosen by treating this as what it is — a B2C e-commerce app, where the highest-risk failures are "can't log in" and "gets a customer's money wrong," not exhaustive feature coverage. The full reasoning for this selection (and what was deliberately left out) is in [`DIARY.md`](./DIARY.md).
+Three critical-path areas, chosen by treating this as what it is — a B2C e-commerce app, where the highest-risk failures are "can't log in" and "gets a customer's money wrong," not exhaustive feature coverage. The full reasoning for this selection (and what was deliberately left out) is in [`DIARY.md`](./DIARY.md).
 
 - **Login** (`tests/login.spec.ts`) — successful login, invalid credentials, and a locked-out account as two distinct failure cases (different error messages, different underlying checks), plus logging out.
 - **Purchase journey** (`tests/purchase-journey.spec.ts`) — a single end-to-end flow (login → add two items → checkout → confirmation), asserting the exact price math (subtotal/tax/total), not just that checkout completed. Uses `test.step()` for per-step failure localization and attaches screenshots/a price breakdown to the report as evidence.
