@@ -17,19 +17,13 @@ import type { Locator, Page } from "@playwright/test";
 export class BurgerMenu {
   readonly openButton: Locator;
   readonly closeButton: Locator;
-  readonly allItemsLink: Locator;
-  readonly aboutLink: Locator;
   readonly logoutLink: Locator;
-  readonly resetAppStateLink: Locator;
 
   constructor(page: Page) {
     const panel = page.locator(".bm-menu-wrap");
     this.openButton = page.getByRole("button", { name: "Open Menu" });
     this.closeButton = page.getByRole("button", { name: "Close Menu" });
-    this.allItemsLink = panel.getByTestId("inventory-sidebar-link");
-    this.aboutLink = panel.getByTestId("about-sidebar-link");
     this.logoutLink = panel.getByTestId("logout-sidebar-link");
-    this.resetAppStateLink = panel.getByTestId("reset-sidebar-link");
   }
 
   async open(): Promise<void> {
@@ -37,24 +31,8 @@ export class BurgerMenu {
     await this.closeButton.waitFor({ state: "visible" });
   }
 
-  async close(): Promise<void> {
-    await this.closeButton.click();
-    await this.openButton.waitFor({ state: "visible" });
-  }
-
   async logout(): Promise<void> {
     await this.open();
     await this.logoutLink.click();
-  }
-
-  async resetAppState(): Promise<void> {
-    await this.open();
-    await this.resetAppStateLink.click();
-    await this.close();
-  }
-
-  async goToAllItems(): Promise<void> {
-    await this.open();
-    await this.allItemsLink.click();
   }
 }
