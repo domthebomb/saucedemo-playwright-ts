@@ -4,6 +4,16 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 08:33 — Foundations: ESLint enforcement + .nvmrc for reviewer friction
+
+**Decision:** Before writing any test logic, laid the foundations for the codebase: ESLint (with typescript-eslint + Prettier) so the project has an enforced set of rules keeping it tidy, and `.nvmrc` pinning the exact Node version.
+
+**Why:** A codebase needs some enforcement of its own rules to stay tidy over time — ESLint gives that, and as a side benefit it also gives Claude Code a consistent style contract to work within rather than improvising. `.nvmrc` is specifically for the reviewer: the goal is zero friction getting this repo running — with it, all they need is `nvm use` and the right Node version is guaranteed, no manual version-hunting or "works on my machine" issues.
+
+**Next:** Scaffold the Playwright + TypeScript test project on top of these foundations.
+
+---
+
 ## 2026-09-19 08:18 — Scope ticket: Sauce Demo login + 3 critical flows, Playwright + TS
 
 **Decision:** Read the full assignment brief and had it written up as a ticket, so scope is fixed before code starts:
