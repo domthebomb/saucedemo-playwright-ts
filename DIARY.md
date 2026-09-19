@@ -4,6 +4,20 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 11:25 — Closing note: thank you, and a word on scope
+
+**Decision:** Final entry. Total time clocked: just over 3 hours against the stated 2-3 hour box — logged honestly rather than rounded down.
+
+A genuine thank you to whoever is reviewing this — reading a repo this closely, and a diary this long, is real effort on your side too, and I don't take that for granted.
+
+One thing I'd want you to take from this, beyond the tests themselves: I don't like letting scope creep, and I like it even less now than I would have a few years ago. AI makes scope creep easy in a way it wasn't before — a model will happily keep building, keep polishing, keep adding "one more thing" without the friction that used to naturally cap effort, and the result is a lot of surface area nobody asked for and nobody's fully checked. The last few PRs (`CLAUDE.md`, the dead-code cleanup, branch protection) were a deliberate, bounded exception to that instinct, not a contradiction of it — each one was scoped to a single finding from an independent review, shipped as its own reviewable PR, and each one's CI check is visible in this repo's Actions tab as a real, required GitHub check rather than an advisory one. If you open the Actions tab, that's what you're looking at: not a claim, a record.
+
+**Why:** This is the honest closing note, not a victory lap — the time-box ran over, and that's on the record too, not smoothed out of it.
+
+**Next:** None. Submission complete.
+
+---
+
 ## 2026-09-19 11:15 — Turned on branch protection: CI is now an actual gate
 
 **Decision:** The same review that flagged the dead-code overstatement (see the entry above) also caught that the 11:02 entry's claim — that CI turns "the tests pass" into "an actual quality gate/definition of done, not a courtesy" — wasn't true yet: `master` had no branch protection, so a red check wouldn't have blocked either of the two merges that already happened. Turned it on via `gh api .../branches/master/protection`, requiring the `test` status check (the CI job) to pass, in strict mode (branch must be up to date with `master` before merging). Verified it's actually active by reading the setting back, not just trusting the PUT returned 200.
