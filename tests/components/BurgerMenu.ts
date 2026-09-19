@@ -9,7 +9,10 @@ import type { Locator, Page } from "@playwright/test";
  * Note: the `data-test="open-menu"`/`"close-menu"` elements are decorative
  * <img> overlays from the underlying react-burger-menu widget; the actual
  * clickable control is the accessible "Open Menu"/"Close Menu" button
- * beneath them, so locators target that button by role instead.
+ * beneath them, so locators target that button by role instead. Verified
+ * against the live DOM that those toggle buttons render outside the sliding
+ * panel (`.bm-menu-wrap`), while the nav links render inside it — so only
+ * the nav links are scoped to that root.
  */
 export class BurgerMenu {
   readonly openButton: Locator;
@@ -19,13 +22,14 @@ export class BurgerMenu {
   readonly logoutLink: Locator;
   readonly resetAppStateLink: Locator;
 
-  constructor(private readonly page: Page) {
+  constructor(page: Page) {
+    const panel = page.locator(".bm-menu-wrap");
     this.openButton = page.getByRole("button", { name: "Open Menu" });
     this.closeButton = page.getByRole("button", { name: "Close Menu" });
-    this.allItemsLink = page.getByTestId("inventory-sidebar-link");
-    this.aboutLink = page.getByTestId("about-sidebar-link");
-    this.logoutLink = page.getByTestId("logout-sidebar-link");
-    this.resetAppStateLink = page.getByTestId("reset-sidebar-link");
+    this.allItemsLink = panel.getByTestId("inventory-sidebar-link");
+    this.aboutLink = panel.getByTestId("about-sidebar-link");
+    this.logoutLink = panel.getByTestId("logout-sidebar-link");
+    this.resetAppStateLink = panel.getByTestId("reset-sidebar-link");
   }
 
   async open(): Promise<void> {

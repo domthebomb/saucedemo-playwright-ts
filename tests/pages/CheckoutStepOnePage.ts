@@ -6,8 +6,6 @@ export class CheckoutStepOnePage extends AuthenticatedPage {
   readonly lastNameInput: Locator = this.page.getByTestId("lastName");
   readonly postalCodeInput: Locator = this.page.getByTestId("postalCode");
   readonly continueButton: Locator = this.page.getByTestId("continue");
-  readonly cancelButton: Locator = this.page.getByTestId("cancel");
-  readonly errorMessage: Locator = this.page.getByTestId("error");
 
   async fillInfo(firstName: string, lastName: string, postalCode: string): Promise<void> {
     await this.firstNameInput.fill(firstName);

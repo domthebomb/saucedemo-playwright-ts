@@ -4,6 +4,52 @@ A reverse-chronological log of the decisions and reasoning behind this project, 
 
 ---
 
+## 2026-09-19 10:39 — Collapsed the stack back into one PR, with the commits kept intact
+
+**Decision:** Reversing the 10:29 decision to use stacked PRs. Requested an independent Opus assessment (fresh agent, no session context) of whether the full scope of what had accumulated — POM work, an independent code review, a growing diary, and now a 3-layer stacked-PR chain — was appropriately scaled for a 2-3 hour take-home that explicitly de-prioritizes process over "clean/maintainable code, logical structuring, thought process." Its verdict on the stack specifically: wrong tool for this shape of change. A stack's purpose is landing an independent unit while later layers are still in review; what we had was a mid-session bug fix discovered 90 minutes into unmerged work in the same sitting — not a separable landing unit. The diff sizes made the same point on their own (roughly 90/65/220 lines across the three layers) — small enough that three ordered commits in one PR communicate the same "these are different concerns" signal without the review overhead of three linked PRs for a single reviewer who reads the whole thing at once regardless.
+
+Collapsed by removing local `gh-stack` tracking (`gh stack unstack --local` — nothing had been pushed or linked on GitHub yet, so this was purely local cleanup) and deleting the two intermediate branches; `feature/critical-path-tests` already contained every commit from both lower layers in linear order, so no history rewrite was needed — "collapsing" was just the decision to open one PR from this branch instead of three.
+
+**Why:** The same review also flagged a sharper risk than "looks like overkill": the 09:42 entry already said a single PR was right-sized, so the 10:29 reversal was on the record without ever addressing why ordered commits didn't solve the same problem for free — exactly the gap an interviewer would push on. Collapsing now, with this entry explaining both the reversal and the reversal-of-the-reversal, converts the whole episode into a demonstrated right-sizing judgment call rather than a live liability. The same independent-review instinct that caught the locator-scoping bug earlier applies here too: check your own process decisions against outside judgment before shipping them, not just your code.
+
+**Next:** Push `feature/critical-path-tests` and open the single PR against `master`.
+
+---
+
+## 2026-09-19 10:29 — Reversing the single-PR decision: stacked PRs instead
+
+**Decision:** The 09:42 entry below explicitly decided one PR was the right size for the critical-path tests and that stacking would be "process for its own sake" here. Reversing that now: split the accumulated work into a 3-layer stack instead — `fix/product-list-locator-scoping` → `chore/eslint-playwright-hardening` → `feature/critical-path-tests` — using GitHub's native stacked-PR feature (public preview since 2026-07-30) via the `gh-stack` CLI extension, rather than one PR.
+
+**Why:** The original call wasn't wrong given what was known at the time — it assumed the branch would contain roughly what the ticket described. What actually happened is that *writing* the tests surfaced a real locator-scoping bug (via an independent Opus review) and a genuine lint gap, neither of which existed as known scope when that decision was made. That's a sharper version of an old problem: AI-assisted sessions can generate a lot of surface area very quickly, so a scope decision made once up front doesn't hold — it has to be revisited as new information actually appears, or a single PR quietly balloons into three unrelated concerns (a bugfix, a tooling change, and the actual deliverable) bundled as one diff, which is exactly the kind of PR that's hard to review well regardless of its line count. Splitting them means a reviewer can evaluate "is the bug fix correct," "is the tooling change reasonable," and "are these the right tests" as three separate, smaller questions instead of one entangled one.
+
+The GitHub Copilot review plan from the 09:42 entry still stands — requesting it on the stack's PRs once opened, for the same reason as before: an independent model reviewing code this session wrote is worth more than this session reviewing itself.
+
+**Next:** Run `gh stack submit` to push all three branches and open the linked PRs, then request Copilot review.
+
+---
+
+## 2026-09-19 10:28 — Hardened lint/config as its own change, separate from the bugfix
+
+**Decision:** Split the tooling hardening (ESLint's `recommendedTypeChecked` + `eslint-plugin-playwright`, `playwright.config.ts` trace/reporter tweaks) into its own change on top of the locator-scoping fix, rather than bundling it into that same commit/PR.
+
+**Why:** The two are related but not the same decision: the bugfix addresses one specific bug; the lint upgrade addresses the *class* of bug — specifically enabling `@typescript-eslint/no-floating-promises`, which is the rule that would have flagged a missing `await` on an `expect()` call, the exact failure mode that let the locator bug's specs pass for the wrong reason. Reviewing them separately means a reviewer can evaluate "is this fix correct" independently from "is this tooling change reasonable," instead of one diff doing both jobs.
+
+**Next:** Layer the actual new test specs on top of this — the deliverable, now sitting on a verified-correct, better-linted foundation.
+
+---
+
+## 2026-09-19 10:26 — Independent Opus review found a real locator-scoping bug
+
+**Decision:** Requested a fresh Opus-model agent, deliberately with no context from this session, to review the POM and specs cold against the assignment brief before committing them. It found a genuine correctness bug, not just style feedback: `data-test="inventory-item"` is reused by Sauce Demo across the inventory grid, the cart rows, and the checkout order summary, and every page object queried it from the bare page rather than a scoped container — so `CartPage.items` and `InventoryPage.items` were, structurally, the same locator. Verified this myself rather than taking the report on faith: 8/8 runs of "click cart link → wait for cart URL → query the locator `CartPage.items` used" returned the 6 inventory cards, not the 2 cart rows, because the site is a client-routed SPA where the URL updates before React re-renders. Existing specs passed anyway only because retrying `expect()` calls waited out the race; `cart-management.spec.ts`'s item-removal calls had no such gate and could silently act on the wrong page.
+
+Fixed by extracting a `ProductList` component rooted at each page's own container, which also collapsed three copies of near-identical item-lookup logic into one — the review separately flagged that duplication as undercutting the "promote reuse" rationale already documented for the Header/BurgerMenu split. Also trimmed a real pile of dead POM surface the review found: several page-object methods and two fixture users with zero call sites anywhere in the specs.
+
+**Why:** The review was deliberately a fresh agent with no session context, not a fork of this conversation — the reasoning is the same as requesting a GitHub Copilot review: the same model reviewing its own output shares its own blind spots, so an independent pass is only worth something if it's actually independent.
+
+**Next:** Harden lint/type-check config so this class of bug is caught automatically next time, as its own change — logged separately below.
+
+---
+
 ## 2026-09-19 09:31 — Credential management: fine as hardcoded here, would use 1Password CLI in an enterprise framework
 
 **Decision:** A separate note from the test-strategy entry above, since it's a distinct decision rather than part of choosing which 4 tests to write.
