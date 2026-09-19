@@ -5,10 +5,12 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: "html",
+  reporter: [["list"], ["html", { open: process.env.CI ? "never" : "on-failure" }]],
   use: {
     baseURL: "https://www.saucedemo.com",
-    trace: "on-first-retry",
+    // "on-first-retry" only helps if retries are enabled (CI only, see above);
+    // locally with retries: 0 that would mean never getting a trace at all.
+    trace: process.env.CI ? "on-first-retry" : "retain-on-failure",
     screenshot: "only-on-failure",
     // Sauce Demo marks interactive elements with data-test, not the Playwright default data-testid.
     testIdAttribute: "data-test",
